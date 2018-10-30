@@ -1,7 +1,7 @@
 class NegociacaoController {
 
     constructor() {
-        this._ordemAtual = '';
+
         let $ = document.querySelector.bind(document);
         this._inputData = $('#data');
         this._inputQuantidade = $('#quantidade');
@@ -16,6 +16,8 @@ class NegociacaoController {
             new Mensagem(),
             new MensagemView($('#mensagemView')),
             'texto');
+
+        this._ordemAtual = '';
     }
 
     adiciona(event) {
@@ -31,6 +33,15 @@ class NegociacaoController {
 
     importaNegociacoes() {
 
+        let service = new NegociacaoService();
+        service
+            .obterNegociacoes()
+            .then(negociacoes => negociacoes.forEach(negociacao => {
+                this._listaNegociacoes.adiciona(negociacao);
+                this._mensagem.texto = 'Negociações do período importadas'
+            }))
+            .catch(erro => this._mensagem.texto = erro);
+        /*
         let service = new NegociacoesService();
 
         Promise.all([
@@ -42,7 +53,7 @@ class NegociacaoController {
                 .forEach(negociacoes => this._listaNegociacoes.adiciona(negociacoes));
             this._mensagem.texto = 'Negociações importadas com sucesso';
         }).catch(erro => this._mensagem.texto = '');
-
+        //-------------------------------------------
         /*
         service.obterNegociacoesDaSemana()
             .then(negociacoes => {
@@ -101,7 +112,7 @@ class NegociacaoController {
         //this._mensagemView.update(this._mensagem);
     }
 
-    _criaNegociacoes() {
+    _criaNegociacao() {
         return new Negociacao(
             DateHelper.textoParaData(this._inputData.value),
             this._inputQuantidade.value,
@@ -115,13 +126,12 @@ class NegociacaoController {
     }
 
     ordena(coluna) {
-        this._listaNegociacoes.ordena((a, b) => a[coluna] - b[coluna]);
-
         if (this._ordemAtual == coluna) {
             this._listaNegociacoes.inverteOrdem();
         } else {
-            this._listaNegociacoes.ordena((a, b) => a[coluna] - b[coluna]);
+            this._listaNegociacoes.ordena((p, s) => p[coluna] - s[coluna]);
         }
         this._ordemAtual = coluna;
+
     }
 }
